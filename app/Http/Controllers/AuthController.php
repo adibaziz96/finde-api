@@ -38,9 +38,9 @@ class AuthController extends Controller
                 'email' => 'required|email',
                 'password' => 'required',
             ]);
-    
+
             $authData = $this->auth->login($validated);
-    
+
             return response()->json($authData);
         } catch(\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -51,7 +51,7 @@ class AuthController extends Controller
     {
         try {
             $this->auth->logout($request->user());
-    
+
             return response()->json(['message' => 'Logged out successfully']);
         } catch(\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
