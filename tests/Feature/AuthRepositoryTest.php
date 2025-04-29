@@ -2,21 +2,19 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Repositories\AuthRepository;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use App\Repositories\AuthRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class AuthRepositoryTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_create_user()
+    public function test_register()
     {
         $authRepo = new AuthRepository();
-
-        $user = $authRepo->createUser([
+        $user = $authRepo->register([
             'name' => 'Adib',
             'email' => 'adib@example.com',
             'password' => '123',
@@ -26,17 +24,40 @@ class AuthRepositoryTest extends TestCase
         $this->assertEquals('Adib', $user->name);
     }
 
-    public function test_validate_password()
+    public function test_login()
     {
-        $user = new User([
-            'email' => 'adib@example.com',
-            'password' => Hash::make('123')
-        ]);
-
         $authRepo = new AuthRepository();
 
-        $this->assertTrue($authRepo->validatePassword($user, '123'));
-        $this->assertFalse($authRepo->validatePassword($user, 'wrongpassword'));
+        $authRepo->register([
+            'name' => 'Adib',
+            'email' => 'adib@example.com',
+            'password' => '123',
+        ]);
+
+        $response = $authRepo->login([
+            'email' => 'adib@example.com',
+            'password' => '123',
+        ]);
+
+        $this->assertIsArray($response);
+        $this->assertArrayHasKey('token', $response);
+        $this->assertArrayHasKey('user', $response);
+        $this->assertInstanceOf(User::class, $response['user']);
+        $this->assertEquals('Adib', $response['user']->name);
+    }
+
+    public function test_logout()
+    {
+        $authRepo = new AuthRepository();
+
+        $user = $authRepo->register([
+            'name' => 'Adib',
+            'email' => 'adib@example.com',
+            'password' => '123',
+        ]);
+
+        $token = $user->createToken('test-token');
+        $user->withAccessToken($token->accessToken);
+        $this->assertTrue($authRepo->logout($user));
     }
 }
-

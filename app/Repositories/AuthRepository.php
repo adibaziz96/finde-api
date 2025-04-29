@@ -3,25 +3,26 @@
 namespace App\Repositories;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use App\Repositories\Contracts\AuthRepositoryInterface;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AuthRepository implements AuthRepositoryInterface
 {
-    public function register(array $data)
+    public function register($data)
     {
-        return User::create([
+        return User::firstOrCreate([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
         ]);
     }
 
-    public function login(array $credentials)
+    public function login($credentials)
     {
         $user = User::where('email', $credentials['email'])->first();
 
-        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
+        if (!$user || !Hash::check($credentials['password'], $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['Invalid credentials.'],
             ]);
@@ -40,4 +41,3 @@ class AuthRepository implements AuthRepositoryInterface
         return $user->currentAccessToken()->delete();
     }
 }
-

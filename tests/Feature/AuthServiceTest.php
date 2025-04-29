@@ -2,33 +2,33 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use Mockery;
-use App\Services\AuthService;
-use App\Repositories\Contracts\AuthRepositoryInterface;
-use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Repositories\Contracts\AuthRepositoryInterface;
+use App\Services\AuthService;
+use Illuminate\Support\Facades\Hash;
+use Mockery;
+use Tests\TestCase;
 
 class AuthServiceTest extends TestCase
 {
-    public function test_register_creates_user()
+    public function test_register()
     {
-        // Mock AuthRepositoryInterface
         $authRepo = Mockery::mock(AuthRepositoryInterface::class);
-        
-        // Mock the method calls on the repository
-        $authRepo->shouldReceive('createUser')
+        $this->app->instance(AuthRepositoryInterface::class, $authRepo);
+
+        $authRepo->shouldReceive('register')
             ->once()
+            ->with([
+                'name' => 'Adib',
+                'email' => 'adib@example.com',
+                'password' => '123',
+            ])
             ->andReturn(new User([
                 'name' => 'Adib',
                 'email' => 'adib@example.com',
                 'password' => Hash::make('123'),
             ]));
 
-        // Bind the mock to the service container
-        $this->app->instance(AuthRepositoryInterface::class, $authRepo);
-
-        // Test the AuthService's register method
         $authService = new AuthService($authRepo);
         $user = $authService->register([
             'name' => 'Adib',
@@ -40,36 +40,28 @@ class AuthServiceTest extends TestCase
         $this->assertEquals('Adib', $user->name);
     }
 
-    public function test_login_returns_token_for_valid_user()
+    public function test_login()
     {
-        // Prepare user data
-        $user = new User([
-            'email' => 'adib@example.com',
-            'password' => Hash::make('123')
-        ]);
-
-        // Mock AuthRepositoryInterface
         $authRepo = Mockery::mock(AuthRepositoryInterface::class);
-        
-        $authRepo->shouldReceive('findByEmail')
-            ->once()
-            ->with('adib@example.com')
-            ->andReturn($user);
-
-        $authRepo->shouldReceive('validatePassword')
-            ->once()
-            ->with($user, '123')
-            ->andReturn(true);
-
-        $authRepo->shouldReceive('issueToken')
-            ->once()
-            ->with($user)
-            ->andReturn('valid_token');
-
-        // Bind the mock to the service container
         $this->app->instance(AuthRepositoryInterface::class, $authRepo);
 
-        // Test the AuthService's login method
+        $mockUser = new User([
+            'name' => 'Adib',
+            'email' => 'adib@example.com',
+            'password' => Hash::make('123'),
+        ]);
+
+        $authRepo->shouldReceive('login')
+            ->once()
+            ->with([
+                'email' => 'adib@example.com',
+                'password' => '123',
+            ])
+            ->andReturn([
+                'token' => 'mock-token-123',
+                'user' => $mockUser,
+            ]);
+
         $authService = new AuthService($authRepo);
         $result = $authService->login([
             'email' => 'adib@example.com',
@@ -77,6 +69,25 @@ class AuthServiceTest extends TestCase
         ]);
 
         $this->assertArrayHasKey('token', $result);
-        $this->assertEquals('valid_token', $result['token']);
+        $this->assertEquals('Adib', $result['user']->name);
+    }
+
+    public function test_logout()
+    {
+        $authRepo = Mockery::mock(AuthRepositoryInterface::class);
+        $this->app->instance(AuthRepositoryInterface::class, $authRepo);
+
+        $mockUser = new User([
+            'name' => 'Adib',
+            'email' => 'adib@example.com',
+        ]);
+
+        $authRepo->shouldReceive('logout')
+            ->once()
+            ->with($mockUser)
+            ->andReturn(true);
+
+        $authService = new AuthService($authRepo);
+        $this->assertTrue($authService->logout($mockUser));
     }
 }

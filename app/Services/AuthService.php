@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Repositories\Contracts\AuthRepositoryInterface;
 use App\Services\Contracts\AuthServiceInterface;
-use Illuminate\Validation\ValidationException;
 
 class AuthService implements AuthServiceInterface
 {
@@ -15,12 +14,12 @@ class AuthService implements AuthServiceInterface
         $this->authRepo = $authRepo;
     }
 
-    public function register(array $data)
+    public function register($data)
     {
         return $this->authRepo->register($data);
     }
 
-    public function login(array $credentials)
+    public function login($credentials)
     {
         return $this->authRepo->login($credentials);
     }
