@@ -16,33 +16,45 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|string|min:8|confirmed',
+            ]);
 
-        $user = $this->auth->register($validated);
+            $user = $this->auth->register($validated);
 
-        return response()->json(['message' => 'Registered successfully', 'user' => $user]);
+            return response()->json(['message' => 'Registered successfully', 'user' => $user]);
+        } catch(\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function login(Request $request)
     {
-        $validated = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        $authData = $this->auth->login($validated);
-
-        return response()->json($authData);
+        try {
+            $validated = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required',
+            ]);
+    
+            $authData = $this->auth->login($validated);
+    
+            return response()->json($authData);
+        } catch(\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function logout(Request $request)
     {
-        $this->auth->logout($request->user());
-
-        return response()->json(['message' => 'Logged out successfully']);
+        try {
+            $this->auth->logout($request->user());
+    
+            return response()->json(['message' => 'Logged out successfully']);
+        } catch(\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }
