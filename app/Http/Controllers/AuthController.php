@@ -7,11 +7,11 @@ use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
-    protected $auth;
+    protected $authService;
 
-    public function __construct(AuthServiceInterface $auth)
+    public function __construct(AuthServiceInterface $authService)
     {
-        $this->auth = $auth;
+        $this->authService = $authService;
     }
 
     public function register(Request $request)
@@ -23,7 +23,7 @@ class AuthController extends Controller
                 'password' => 'required|string|min:8|confirmed',
             ]);
 
-            $user = $this->auth->register($validated);
+            $user = $this->authService->register($validated);
 
             return response()->json(['message' => 'Registered successfully', 'user' => $user]);
         } catch(\Exception $e) {
@@ -39,7 +39,7 @@ class AuthController extends Controller
                 'password' => 'required',
             ]);
 
-            $authData = $this->auth->login($validated);
+            $authData = $this->authService->login($validated);
 
             return response()->json($authData);
         } catch(\Exception $e) {
@@ -50,7 +50,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         try {
-            $this->auth->logout($request->user());
+            $this->authService->logout($request->user());
 
             return response()->json(['message' => 'Logged out successfully']);
         } catch(\Exception $e) {

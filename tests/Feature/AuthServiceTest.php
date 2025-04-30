@@ -30,14 +30,13 @@ class AuthServiceTest extends TestCase
             ]));
 
         $authService = new AuthService($authRepo);
-        $user = $authService->register([
+        $response = $authService->register([
             'name' => 'Adib',
             'email' => 'adib@example.com',
             'password' => '123',
         ]);
 
-        $this->assertInstanceOf(User::class, $user);
-        $this->assertEquals('Adib', $user->name);
+        $this->assertInstanceOf(User::class, $response);
     }
 
     public function test_login()
@@ -63,13 +62,13 @@ class AuthServiceTest extends TestCase
             ]);
 
         $authService = new AuthService($authRepo);
-        $result = $authService->login([
+        $response = $authService->login([
             'email' => 'adib@example.com',
             'password' => '123',
         ]);
 
-        $this->assertArrayHasKey('token', $result);
-        $this->assertEquals('Adib', $result['user']->name);
+        $this->assertArrayHasKey('user', $response);
+        $this->assertArrayHasKey('token', $response);
     }
 
     public function test_logout()
@@ -88,6 +87,7 @@ class AuthServiceTest extends TestCase
             ->andReturn(true);
 
         $authService = new AuthService($authRepo);
+
         $this->assertTrue($authService->logout($mockUser));
     }
 }

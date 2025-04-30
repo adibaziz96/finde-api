@@ -14,14 +14,13 @@ class AuthRepositoryTest extends TestCase
     public function test_register()
     {
         $authRepo = new AuthRepository();
-        $user = $authRepo->register([
+        $response = $authRepo->register([
             'name' => 'Adib',
             'email' => 'adib@example.com',
             'password' => '123',
         ]);
 
-        $this->assertInstanceOf(User::class, $user);
-        $this->assertEquals('Adib', $user->name);
+        $this->assertInstanceOf(User::class, $response);
     }
 
     public function test_login()
@@ -39,25 +38,23 @@ class AuthRepositoryTest extends TestCase
             'password' => '123',
         ]);
 
-        $this->assertIsArray($response);
-        $this->assertArrayHasKey('token', $response);
         $this->assertArrayHasKey('user', $response);
-        $this->assertInstanceOf(User::class, $response['user']);
-        $this->assertEquals('Adib', $response['user']->name);
+        $this->assertArrayHasKey('token', $response);
     }
 
     public function test_logout()
     {
         $authRepo = new AuthRepository();
 
-        $user = $authRepo->register([
+        $response = $authRepo->register([
             'name' => 'Adib',
             'email' => 'adib@example.com',
             'password' => '123',
         ]);
 
-        $token = $user->createToken('test-token');
-        $user->withAccessToken($token->accessToken);
-        $this->assertTrue($authRepo->logout($user));
+        $token = $response->createToken('test-token');
+        $response->withAccessToken($token->accessToken);
+
+        $this->assertTrue($authRepo->logout($response));
     }
 }

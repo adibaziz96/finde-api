@@ -2,11 +2,13 @@
 
 namespace App\Repositories\Contracts;
 
+use App\Models\User;
+
 interface AuthRepositoryInterface
 {
-    public function register($data);
+    public function register(array $data);
 
-    public function login($credentials);
+    public function login(array $data);
 
-    public function logout($user);
+    public function logout(User $user);
 }

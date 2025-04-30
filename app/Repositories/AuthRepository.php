@@ -9,7 +9,7 @@ use Illuminate\Validation\ValidationException;
 
 class AuthRepository implements AuthRepositoryInterface
 {
-    public function register($data)
+    public function register(array $data)
     {
         return User::firstOrCreate([
             'name' => $data['name'],
@@ -18,11 +18,11 @@ class AuthRepository implements AuthRepositoryInterface
         ]);
     }
 
-    public function login($credentials)
+    public function login(array $data)
     {
-        $user = User::where('email', $credentials['email'])->first();
+        $user = User::where('email', $data['email'])->first();
 
-        if (!$user || !Hash::check($credentials['password'], $user->password)) {
+        if (!$user || !Hash::check($data['password'], $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['Invalid credentials.'],
             ]);
@@ -36,7 +36,7 @@ class AuthRepository implements AuthRepositoryInterface
         ];
     }
 
-    public function logout($user)
+    public function logout(User $user)
     {
         return $user->currentAccessToken()->delete();
     }
