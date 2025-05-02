@@ -11,29 +11,42 @@ use Tests\TestCase;
 
 class AuthServiceTest extends TestCase
 {
+    protected AuthRepositoryInterface $authRepo;
+    protected AuthService $authService;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->authRepo = Mockery::mock(AuthRepositoryInterface::class);
+        $this->authService = new AuthService($this->authRepo);
+    }
+
+    public function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
+
     public function test_register()
     {
-        $authRepo = Mockery::mock(AuthRepositoryInterface::class);
-        $this->app->instance(AuthRepositoryInterface::class, $authRepo);
-
-        $authRepo->shouldReceive('register')
+        $this->authRepo->shouldReceive('register')
             ->once()
             ->with([
                 'name' => 'Adib',
                 'email' => 'adib@example.com',
-                'password' => '123',
+                'password' => '12345678',
             ])
             ->andReturn(new User([
                 'name' => 'Adib',
                 'email' => 'adib@example.com',
-                'password' => Hash::make('123'),
+                'password' => Hash::make('12345678'),
             ]));
 
-        $authService = new AuthService($authRepo);
-        $response = $authService->register([
+        $response = $this->authService->register([
             'name' => 'Adib',
             'email' => 'adib@example.com',
-            'password' => '123',
+            'password' => '12345678',
         ]);
 
         $this->assertInstanceOf(User::class, $response);
@@ -41,30 +54,26 @@ class AuthServiceTest extends TestCase
 
     public function test_login()
     {
-        $authRepo = Mockery::mock(AuthRepositoryInterface::class);
-        $this->app->instance(AuthRepositoryInterface::class, $authRepo);
-
         $mockUser = new User([
             'name' => 'Adib',
             'email' => 'adib@example.com',
-            'password' => Hash::make('123'),
+            'password' => Hash::make('12345678'),
         ]);
 
-        $authRepo->shouldReceive('login')
+        $this->authRepo->shouldReceive('login')
             ->once()
             ->with([
                 'email' => 'adib@example.com',
-                'password' => '123',
+                'password' => '12345678',
             ])
             ->andReturn([
                 'token' => 'mock-token-123',
                 'user' => $mockUser,
             ]);
 
-        $authService = new AuthService($authRepo);
-        $response = $authService->login([
+        $response = $this->authService->login([
             'email' => 'adib@example.com',
-            'password' => '123',
+            'password' => '12345678',
         ]);
 
         $this->assertArrayHasKey('user', $response);
@@ -73,21 +82,16 @@ class AuthServiceTest extends TestCase
 
     public function test_logout()
     {
-        $authRepo = Mockery::mock(AuthRepositoryInterface::class);
-        $this->app->instance(AuthRepositoryInterface::class, $authRepo);
-
         $mockUser = new User([
             'name' => 'Adib',
             'email' => 'adib@example.com',
         ]);
 
-        $authRepo->shouldReceive('logout')
+        $this->authRepo->shouldReceive('logout')
             ->once()
             ->with($mockUser)
             ->andReturn(true);
 
-        $authService = new AuthService($authRepo);
-
-        $this->assertTrue($authService->logout($mockUser));
+        $this->assertTrue($this->authService->logout($mockUser));
     }
 }

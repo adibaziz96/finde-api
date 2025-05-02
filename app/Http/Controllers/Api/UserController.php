@@ -20,36 +20,56 @@ class UserController extends Controller
 
     public function index(UserFilterRequest $request)
     {
-        $users = $this->userService->list($request->validated());
+        try {
+            $users = $this->userService->list($request->validated());
 
-        return UserResource::collection($users);
+            return UserResource::collection($users);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
-    public function store(UserRequest $request): UserResource
+    public function store(UserRequest $request)
     {
-        $user = $this->userService->store($request->validated());
+        try {
+            $user = $this->userService->create($request->validated());
 
-        return new UserResource($user);
+            return new UserResource($user);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
-    public function show($id): UserResource
+    public function show($id)
     {
-        $user = $this->userService->show($id);
+        try {
+            $user = $this->userService->find($id);
 
-        return new UserResource($user);
+            return new UserResource($user);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
-    public function update(UserRequest $request, $id): UserResource
+    public function update(UserRequest $request, $id)
     {
-        $user = $this->userService->update($id, $request->validated());
+        try {
+            $user = $this->userService->update($id, $request->validated());
 
-        return new UserResource($user);
+            return new UserResource($user);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function destroy($id): JsonResponse
     {
-        $this->userService->destroy($id);
+        try {
+            $this->userService->delete($id);
 
-        return response()->json(['message' => 'Deleted successfully']);
+            return response()->json(['message' => 'Deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

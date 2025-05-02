@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Services\Contracts\UserServiceInterface;
-use Illuminate\Support\Facades\Hash;
 
 class UserService implements UserServiceInterface
 {
@@ -15,15 +14,13 @@ class UserService implements UserServiceInterface
         $this->userRepo = $userRepo;
     }
 
-    public function list(array $filters = [])
+    public function list($filters = [])
     {
         return $this->userRepo->list($filters);
     }
 
-    public function create(array $data)
+    public function create($data)
     {
-        $data['password'] = Hash::make($data['password']);
-
         return $this->userRepo->create($data);
     }
 
@@ -32,12 +29,8 @@ class UserService implements UserServiceInterface
         return $this->userRepo->find($id);
     }
 
-    public function update($id, array $data)
+    public function update($id, $data)
     {
-        if (isset($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        }
-
         return $this->userRepo->update($id, $data);
     }
 

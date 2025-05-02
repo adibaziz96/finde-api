@@ -11,50 +11,55 @@ class AuthRepositoryTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected AuthRepository $authRepo;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->authRepo = new AuthRepository();
+    }
+
     public function test_register()
     {
-        $authRepo = new AuthRepository();
-        $response = $authRepo->register([
+        $response = $this->authRepo->register([
             'name' => 'Adib',
             'email' => 'adib@example.com',
-            'password' => '123',
+            'password' => '12345678',
         ]);
 
         $this->assertInstanceOf(User::class, $response);
+        $this->assertDatabaseHas('users', ['email' => 'adib@example.com']);
     }
 
     public function test_login()
     {
-        $authRepo = new AuthRepository();
-
-        $authRepo->register([
+        $this->authRepo->register([
             'name' => 'Adib',
             'email' => 'adib@example.com',
-            'password' => '123',
+            'password' => '12345678',
         ]);
 
-        $response = $authRepo->login([
+        $response = $this->authRepo->login([
             'email' => 'adib@example.com',
-            'password' => '123',
+            'password' => '12345678',
         ]);
 
         $this->assertArrayHasKey('user', $response);
         $this->assertArrayHasKey('token', $response);
+        $this->assertEquals($response['user']->email, 'adib@example.com');
     }
 
     public function test_logout()
     {
-        $authRepo = new AuthRepository();
-
-        $response = $authRepo->register([
+        $response = $this->authRepo->register([
             'name' => 'Adib',
             'email' => 'adib@example.com',
-            'password' => '123',
+            'password' => '12345678',
         ]);
 
         $token = $response->createToken('test-token');
         $response->withAccessToken($token->accessToken);
 
-        $this->assertTrue($authRepo->logout($response));
+        $this->assertTrue($this->authRepo->logout($response));
     }
 }
