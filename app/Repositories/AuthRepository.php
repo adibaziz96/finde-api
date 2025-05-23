@@ -29,6 +29,9 @@ class AuthRepository implements AuthRepositoryInterface
         }
 
         $token = $user->createToken('api_token')->plainTextToken;
+        $user->tokens()->latest()->first()->update([
+            'expires_at' => now()->addHour(),
+        ]);
 
         return [
             'token' => $token,

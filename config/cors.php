@@ -18,7 +18,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://findeapp.local.com', 'http://localhost', 'https://127.0.0.1'],
+    'allowed_origins' => ['http://findeapp.local.com:3000', 'http://localhost', 'https://127.0.0.1'],
 
     'allowed_origins_patterns' => [],
 
